@@ -149,6 +149,7 @@ public class ModConfigScreen extends Screen {
         private EditBox backgroundAlphaField;
         private EditBox posXField;
         private EditBox posYField;
+        private EditBox seasonDaysField; // 新增：季节天数输入框
 
         @Override
         Component getTitle() {
@@ -228,6 +229,17 @@ public class ModConfigScreen extends Screen {
             posYField.setMaxLength(4);
             addWidget(posYField);
 
+            // 季节天数配置
+            fieldY += spacing;
+            seasonDaysField = new EditBox(
+                    ModConfigScreen.this.font,
+                    fieldX, fieldY, 200, 20,
+                    Component.empty()
+            );
+            seasonDaysField.setValue(String.valueOf(config.seasonDays));
+            seasonDaysField.setMaxLength(4);
+            addWidget(seasonDaysField);
+
             initialized = true;
         }
 
@@ -263,6 +275,14 @@ public class ModConfigScreen extends Screen {
             } catch (NumberFormatException e) {
                 config.position.y = 0;
             }
+
+            // 应用季节天数配置
+            try {
+                int seasonDays = Integer.parseInt(seasonDaysField.getValue());
+                config.seasonDays = Math.max(1, Math.min(seasonDays, 1000));
+            } catch (NumberFormatException e) {
+                config.seasonDays = 28;
+            }
         }
 
         @Override
@@ -276,6 +296,7 @@ public class ModConfigScreen extends Screen {
             config.backgroundAlpha = defaults.backgroundAlpha;
             config.position.x = defaults.position.x;
             config.position.y = defaults.position.y;
+            config.seasonDays = defaults.seasonDays;
 
             // 重新创建复选框来更新状态
             clearWidgets();
@@ -287,6 +308,7 @@ public class ModConfigScreen extends Screen {
             backgroundAlphaField.setValue(String.valueOf(defaults.backgroundAlpha));
             posXField.setValue(String.valueOf(defaults.position.x));
             posYField.setValue(String.valueOf(defaults.position.y));
+            seasonDaysField.setValue(String.valueOf(defaults.seasonDays));
         }
 
         @Override
@@ -295,10 +317,10 @@ public class ModConfigScreen extends Screen {
             int startY = PAGE_START_Y;
             int spacing = 25;
 
-            int leftLabelX = centerX - 170; // 左侧标签位置
-            int fieldX = centerX - 40;    // 输入框位置
+            int leftLabelX = centerX - 170;
+            int fieldX = centerX - 40;
 
-            // 渲染输入框左侧标签
+            // 渲染输入框左侧标签 - 使用翻译键
             int fieldY = startY + spacing;
             guiGraphics.drawString(
                     ModConfigScreen.this.font,
@@ -331,6 +353,13 @@ public class ModConfigScreen extends Screen {
                     ModConfigScreen.this.font,
                     Component.translatable("stardewhud.label.positionY"),
                     leftLabelX + 70, fieldY + 5, 0xFFFFFF, false
+            );
+
+            fieldY += spacing;
+            guiGraphics.drawString(
+                    ModConfigScreen.this.font,
+                    Component.translatable("stardewhud.label.seasonDays"),
+                    leftLabelX + 20, fieldY + 5, 0xFFFFFF, false
             );
         }
     }

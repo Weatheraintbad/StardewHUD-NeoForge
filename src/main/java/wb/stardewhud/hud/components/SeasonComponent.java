@@ -9,7 +9,7 @@ import wb.stardewhud.hud.HudRenderer;
 public class SeasonComponent {
     private final HudRenderer hudRenderer;
 
-    // 季节图标 - 使用 ResourceLocation.parse
+    // 季节图标
     private static final ResourceLocation SPRING_ICON = ResourceLocation.parse(StardewHUD.MOD_ID + ":textures/icons/fortune/spring.png");
     private static final ResourceLocation SUMMER_ICON = ResourceLocation.parse(StardewHUD.MOD_ID + ":textures/icons/fortune/summer.png");
     private static final ResourceLocation AUTUMN_ICON = ResourceLocation.parse(StardewHUD.MOD_ID + ":textures/icons/fortune/autumn.png");
@@ -25,7 +25,6 @@ public class SeasonComponent {
     public void render(GuiGraphics context, int x, int y) {
         context.blit(currentSeasonIcon, x - 8, y - 2, 0, 0, 41, 17, 41, 17);
     }
-
 
     public void update() {
         Minecraft client = hudRenderer.getClient();
@@ -44,8 +43,11 @@ public class SeasonComponent {
             long oldDay = lastCalculatedDay;
             lastCalculatedDay = dayFromTicks;
 
-            // 计算季节索引（每91天一个季节）
-            int seasonIndex = (int)((dayFromTicks / 28) % 4);
+            // 从配置中获取每个季节持续的天数
+            int seasonDays = StardewHUD.getConfig().seasonDays;
+
+            // 计算季节索引（使用配置的天数）
+            int seasonIndex = (int)((dayFromTicks / seasonDays) % 4);
 
             // 获取新季节图标
             ResourceLocation newSeasonIcon = getSeasonIcon(seasonIndex);
@@ -55,13 +57,14 @@ public class SeasonComponent {
                 ResourceLocation oldIcon = currentSeasonIcon;
                 currentSeasonIcon = newSeasonIcon;
 
-                StardewHUD.LOGGER.info("季节图标切换: [{}] 第{}天 -> 第{}天, 图标: {} -> {}",
+                StardewHUD.LOGGER.debug("季节图标切换: [{}] 第{}天 -> 第{}天, 图标: {} -> {} (每个季节{}天)",
                         getSeasonName(seasonIndex),
                         oldDay, dayFromTicks,
-                        getFileName(oldIcon), getFileName(newSeasonIcon));
+                        getFileName(oldIcon), getFileName(newSeasonIcon),
+                        seasonDays);
             } else {
-                StardewHUD.LOGGER.debug("游戏日变化: 第{}天 -> 第{}天, 季节保持: {}",
-                        oldDay, dayFromTicks, getSeasonName(seasonIndex));
+                StardewHUD.LOGGER.debug("游戏日变化: 第{}天 -> 第{}天, 季节保持: {} (每个季节{}天)",
+                        oldDay, dayFromTicks, getSeasonName(seasonIndex), seasonDays);
             }
         }
     }
